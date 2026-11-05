@@ -193,7 +193,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()
   if(sessionStorage.getItem('roche_demo_signed_in')==='yes') showDashboard();
   form.addEventListener('submit',function(e){
     e.preventDefault();
-    if(user.value.trim().toLowerCase()==='josh@roche.com' && pass.value==='roche123'){
+    if (['josh@roche.com', 'david@roche.com', 'scott@roche.com'].includes(user.value.trim().toLowerCase()) && pass.value === 'roche123'){
       sessionStorage.setItem('roche_demo_signed_in','yes');
       showDashboard();
     } else {
