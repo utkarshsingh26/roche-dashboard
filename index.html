@@ -90,10 +90,10 @@ body.demo-authenticated > .login-screen { display:none !important; }
 
 /* Demo assistant: self-contained, rule-based answers sourced from synthetic dashboard data. */
 .chat-launcher{position:fixed;right:22px;bottom:22px;z-index:65;display:none;align-items:center;gap:9px;padding:13px 17px;border:0;border-radius:28px;background:#0068ce;color:#fff;font-size:13px;font-weight:700;box-shadow:0 8px 30px #002d6560}
-body.demo-authenticated .chat-launcher{display:flex}
+body.demo-authenticated .chat-launcher{display:flex!important;visibility:visible!important;opacity:1!important;z-index:9999!important}
 .chat-launcher:hover{background:#0051a5}
 .chat-launcher svg{height:20px;width:20px}
-.chat-window{position:fixed;right:22px;bottom:82px;width:min(380px,calc(100vw - 24px));height:min(555px,calc(100vh - 108px));z-index:66;display:none;flex-direction:column;border:1px solid #c6dded;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 18px 60px #001c4860}
+.chat-window{position:fixed;right:22px;bottom:82px;width:min(380px,calc(100vw - 24px));height:min(555px,calc(100vh - 108px));z-index:10000;display:none;flex-direction:column;border:1px solid #c6dded;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 18px 60px #001c4860}
 body.demo-authenticated .chat-window.chat-open{display:flex}
 .chat-top{display:flex;align-items:center;gap:10px;padding:14px 15px;background:linear-gradient(100deg,#002d66,#006cc8);color:white}
 .chat-avatar{width:33px;height:33px;border-radius:10px;background:#ffffff24;display:grid;place-items:center;font-size:19px}
@@ -112,6 +112,11 @@ body.demo-authenticated .chat-window.chat-open{display:flex}
 .chat-send{background:#006aca;color:white;border:0;border-radius:7px;padding:0 13px;font-size:12px;font-weight:700}
 .chat-disclaimer{text-align:center;background:#fff;padding:0 10px 9px;font-size:10px;color:#627a90}
 @media(max-width:500px){.chat-launcher{right:12px;bottom:12px}.chat-window{right:12px;bottom:71px;height:min(560px,calc(100vh - 89px))}}
+
+/* Header entry point keeps the assistant discoverable on large dashboards. */
+.header-chat-btn{border:1px solid #8cbee9;color:#0059b6;background:#fff;border-radius:6px;padding:8px 11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px #063d6814}
+.header-chat-btn:hover{background:#e6f3ff}
+@media(max-width:1100px){.header-chat-btn{padding:7px 8px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -136,7 +141,7 @@ body.demo-authenticated .chat-window.chat-open{display:flex}
   <div class="sidebar-art"><div class="pitch">Advancing diagnostics.<br>Empowering people.</div><div class="locations">Roche<br>Tissue Diagnostics<br>North America<br><br>Tucson, AZ &nbsp;|&nbsp; Indianapolis<br>Santa Clara &nbsp;|&nbsp; Pleasanton<br>Branchburg &nbsp;|&nbsp; and beyond</div></div>
 </aside>
 <div class="main">
-<header class="topbar"><div class="headline"><div><div class="app-title">em<span>Power</span><b>+</b> <span style="color:#072c60;font-size:.75em;letter-spacing:-1px">@Roche N.A.</span></div><div class="app-sub">People. Health. Innovation. A Healthier Workforce for a Brighter Tomorrow.</div></div><div class="title-divider"></div><div><div class="division-title">Tissue Diagnostics</div><div class="division-sub">North America &nbsp;|&nbsp; Workforce Intelligence &amp; Readiness Command Center</div></div></div><div class="top-right"><button class="demo-logout" id="demoLogout" type="button" title="Sign out of demo">Sign out</button><div class="datebox"><span class="calendar">▦</span><span>Aug 12, 2026<br>08:45 AM (MST)</span></div><div class="live"><span class="dot"></span>Demo Data</div><div class="motto">Healthier People<br>Stronger Science<br>Brighter Futures</div></div></header>
+<header class="topbar"><div class="headline"><div><div class="app-title">em<span>Power</span><b>+</b> <span style="color:#072c60;font-size:.75em;letter-spacing:-1px">@Roche N.A.</span></div><div class="app-sub">People. Health. Innovation. A Healthier Workforce for a Brighter Tomorrow.</div></div><div class="title-divider"></div><div><div class="division-title">Tissue Diagnostics</div><div class="division-sub">North America &nbsp;|&nbsp; Workforce Intelligence &amp; Readiness Command Center</div></div></div><div class="top-right"><button class="header-chat-btn" id="headerChatButton" type="button" aria-controls="chatWindow" aria-label="Open emPower assistant">✦ Ask emPower+</button><button class="demo-logout" id="demoLogout" type="button" title="Sign out of demo">Sign out</button><div class="datebox"><span class="calendar">▦</span><span>Aug 12, 2026<br>08:45 AM (MST)</span></div><div class="live"><span class="dot"></span>Demo Data</div><div class="motto">Healthier People<br>Stronger Science<br>Brighter Futures</div></div></header>
 <div class="content">
 <div class="section-banner" id="sectionBanner"><div><strong id="sectionTitle"></strong><p id="sectionDescription"></p></div><button id="backOverview">Back to Executive Overview</button></div>
 <section class="alert" data-group="overview"><div class="warning">⚠</div><div class="alert-content"><div><strong>18%</strong> of Roche Tissue Diagnostics N.A. employees are projected to be at elevated burnout risk within the next 90 days,<br class="alert-break"> representing approximately <span class="amount">$14.7M</span> in productivity, turnover, and quality-related operational exposure.</div><small>Primary drivers: instrumentation engineering workload &nbsp;|&nbsp; product launch pressure &nbsp;|&nbsp; manufacturing overtime &nbsp;|&nbsp; field service travel intensity &nbsp;|&nbsp; manager span-of-control</small></div><button class="outline-btn" onclick="openDetails('insights')">View AI Insights &nbsp; ✨</button></section>
@@ -344,6 +349,7 @@ drawPulseTrend(90);
   post('Hi! I’m the emPower+ demo assistant. Ask me about workforce risks, division readiness, financial exposure, or recommendations. My answers are based only on synthetic dashboard data.','bot');
   function toggle(open){windowEl.classList.toggle('chat-open',open);launcher.setAttribute('aria-expanded',String(open));if(open) input.focus();else launcher.focus();}
   launcher.addEventListener('click',()=>toggle(!windowEl.classList.contains('chat-open')));
+  document.getElementById('headerChatButton').addEventListener('click',()=>toggle(!windowEl.classList.contains('chat-open')));
   close.addEventListener('click',()=>toggle(false));
   form.addEventListener('submit',e=>{e.preventDefault();ask(input.value);});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&windowEl.classList.contains('chat-open'))toggle(false);});
