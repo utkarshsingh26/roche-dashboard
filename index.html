@@ -87,6 +87,31 @@ body.demo-authenticated > .login-screen { display:none !important; }
 @media(max-width:1100px){.pulse-section{grid-template-columns:1fr 1fr}.pulse-section .pulse-card:last-child{grid-column:1/-1}}
 @media(max-width:650px){.pulse-section{grid-template-columns:1fr}.pulse-section .pulse-card:last-child{grid-column:auto}}
 
+
+/* Demo assistant: self-contained, rule-based answers sourced from synthetic dashboard data. */
+.chat-launcher{position:fixed;right:22px;bottom:22px;z-index:65;display:none;align-items:center;gap:9px;padding:13px 17px;border:0;border-radius:28px;background:#0068ce;color:#fff;font-size:13px;font-weight:700;box-shadow:0 8px 30px #002d6560}
+body.demo-authenticated .chat-launcher{display:flex}
+.chat-launcher:hover{background:#0051a5}
+.chat-launcher svg{height:20px;width:20px}
+.chat-window{position:fixed;right:22px;bottom:82px;width:min(380px,calc(100vw - 24px));height:min(555px,calc(100vh - 108px));z-index:66;display:none;flex-direction:column;border:1px solid #c6dded;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 18px 60px #001c4860}
+body.demo-authenticated .chat-window.chat-open{display:flex}
+.chat-top{display:flex;align-items:center;gap:10px;padding:14px 15px;background:linear-gradient(100deg,#002d66,#006cc8);color:white}
+.chat-avatar{width:33px;height:33px;border-radius:10px;background:#ffffff24;display:grid;place-items:center;font-size:19px}
+.chat-top-info{flex:1;min-width:0}.chat-top-info strong{font-size:14px;display:block}.chat-top-info small{font-size:10px;opacity:.86}
+.chat-close{background:transparent;color:white;border:0;font-size:23px;line-height:1;padding:4px 7px}
+.chat-feed{padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:11px;background:#f4f8fc}
+.chat-message{max-width:92%;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
+.chat-message.bot{align-self:flex-start;background:#fff;border:1px solid #d7e7f1;border-bottom-left-radius:3px}
+.chat-message.me{align-self:flex-end;background:#006cce;color:#fff;border-bottom-right-radius:3px}
+.chat-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 13px 11px;background:#f4f8fc}
+.chat-chip{background:white;color:#075aab;border:1px solid #bed6e8;border-radius:20px;padding:7px 9px;font-size:10px;text-align:left}
+.chat-chip:hover{background:#e9f4ff}
+.chat-form{display:flex;gap:8px;padding:11px;border-top:1px solid #dce9f3;background:#fff}
+.chat-input{flex:1;min-width:0;border:1px solid #bcd3e6;border-radius:7px;padding:11px 10px;font-size:12px;outline:none}
+.chat-input:focus{border-color:#0065c8;box-shadow:0 0 0 2px #0065c81f}
+.chat-send{background:#006aca;color:white;border:0;border-radius:7px;padding:0 13px;font-size:12px;font-weight:700}
+.chat-disclaimer{text-align:center;background:#fff;padding:0 10px 9px;font-size:10px;color:#627a90}
+@media(max-width:500px){.chat-launcher{right:12px;bottom:12px}.chat-window{right:12px;bottom:71px;height:min(560px,calc(100vh - 89px))}}
 </style>
 </head>
 <body>
@@ -272,6 +297,57 @@ drawPulseTrend(90);
     user.value='';pass.value='';error.textContent='';
     user.focus();window.scrollTo(0,0);
   });
+})();
+</script>
+
+<!-- Static demo assistant; no network calls, AI API or real employee records. -->
+<button class="chat-launcher" id="chatLauncher" type="button" aria-expanded="false" aria-controls="chatWindow"><span aria-hidden="true">✦</span> Ask emPower+</button>
+<section class="chat-window" id="chatWindow" role="dialog" aria-label="emPower+ demo assistant" aria-modal="false">
+  <div class="chat-top"><span class="chat-avatar" aria-hidden="true">✦</span><div class="chat-top-info"><strong>emPower+ Assistant</strong><small>Workforce insights · Synthetic demo</small></div><button class="chat-close" id="chatClose" type="button" aria-label="Close assistant">×</button></div>
+  <div class="chat-feed" id="chatFeed" role="log" aria-live="polite" aria-relevant="additions"></div>
+  <div class="chat-chips" id="chatChips" aria-label="Suggested questions"></div>
+  <form class="chat-form" id="chatForm"><input class="chat-input" id="chatInput" aria-label="Ask a dashboard question" placeholder="Ask about readiness, risks, costs..." maxlength="350" autocomplete="off"><button class="chat-send" type="submit">Send</button></form>
+  <div class="chat-disclaimer">Rule-based demo · Answers use synthetic dashboard data only</div>
+</section>
+
+<script>
+(function(){
+  'use strict';
+  const launcher=document.getElementById('chatLauncher');
+  const windowEl=document.getElementById('chatWindow');
+  const close=document.getElementById('chatClose');
+  const feed=document.getElementById('chatFeed');
+  const chips=document.getElementById('chatChips');
+  const form=document.getElementById('chatForm');
+  const input=document.getElementById('chatInput');
+  const suggestions=['What are our biggest risks?','Compare divisions','Explain the $14.7M exposure','What should leadership do?'];
+  function post(message,who){const bubble=document.createElement('div');bubble.className='chat-message '+who;bubble.textContent=message;feed.appendChild(bubble);feed.scrollTop=feed.scrollHeight;}
+  function answer(raw){
+    const q=raw.toLowerCase().replace(/[^a-z0-9%$ .-]/g,' ');
+    if(/hello|^hi$|^hey$|help|what can you/.test(q)) return 'I can explain workforce readiness, compare divisions, break down financial exposure, summarize burnout and retention risks, or suggest leadership actions. Try one of the questions below.';
+    if(/financial|exposure|\$14|money|cost|dollar|budget|turnover cost/.test(q)) return 'Modeled annual workforce exposure: $14.7M.\n• Voluntary turnover: $5.2M\n• Productivity loss: $3.7M\n• Overtime burden: $2.8M\n• Safety incidents: $1.4M\n• Quality deviations: $1.0M\n• Vacancy impact: $0.6M\nThese are fictional estimates for this demonstration.';
+    if(/compare|division|department|team|lowest|highest|ranking|rank/.test(q)) return 'Division readiness snapshot (out of 100):\n• Assay Development: 92\n• Quality & Compliance: 91\n• Clinical Affairs: 90\n• Regulatory Affairs: 89\n• Digital Pathology & AI: 84\n• Commercial & Sales: 82\n• Manufacturing Ops: 81\n• Instrumentation Engineering: 78\n• Field Service Engineering: 74\nField Service Engineering has the lowest simulated readiness and high burnout and turnover risk.';
+    if(/field service|travel/.test(q)) return 'Field Service Engineering has readiness 74/100, with high modeled burnout and turnover risk. Travel intensity is one of the synthetic drivers in the executive alert. A next step would be to review travel scheduling and recovery time.';
+    if(/instrument|engineering|overtime|workload/.test(q)) return 'Instrumentation Engineering: readiness 78/100, burnout risk 27%, engineering utilization 92%, average workweek 46.2 hours, and PTO utilization 62%. The simulated recommendation is to reduce overtime by 12%, add 8 Platform Systems FTEs, and strengthen manager support.';
+    if(/manufactur|factory|oee|yield|shift|production/.test(q)) return 'Manufacturing Operations snapshot: OEE 88%, first-pass yield 97%, schedule adherence 94%, overtime utilization 12%, and absenteeism 3.1%. The synthetic recommendation is to optimize rotating shifts and expand fatigue mitigation.';
+    if(/burnout|risk|concern|alert/.test(q)) return 'The 90-day modeled burnout risk is 18% (down 5 percentage points from the earlier comparison period shown in the demo). Main example drivers: engineering workload, launch pressure, manufacturing overtime, field-service travel, and manager span-of-control. Instrumentation Engineering has a 27% modeled burnout risk.';
+    if(/retain|retention|attrition|talent|leave|quitting/.test(q)) return 'Overall modeled turnover risk is 9%. The talent panel shows workload burden at 72%, manager support at 48%, recognition gaps at 36%, promotion delays at 28%, and compensation compression at 24%. These are fictional risk indicators, not employee-level predictions.';
+    if(/safe|safety|quality|incident|compliance/.test(q)) return 'Safety readiness is 95/100 and quality readiness is 94/100. The demo scorecard shows a recordable incident rate of 0.8, laboratory safety compliance of 94%, and quality compliance of 97%. All values are synthetic.';
+    if(/sleep|stress|wellbeing|wellness|recovery|health/.test(q)) return 'Population wellbeing snapshot: 6.8 hours average sleep, sleep consistency 72/100, HRV 68/100, recovery 71/100, stress load 62/100, and physical activity 74/100. These are aggregated fictional indicators, not real biometric readings.';
+    if(/recognition|reward|engagement|incentive/.test(q)) return 'Employee engagement is 87/100. The simulated incentives panel shows participation of 76%, up 8% versus the prior quarter. Example participation drivers include physical activity (68%), learning (62%), and safety (58%).';
+    if(/action|recommend|suggest|improve|leadership|priority|next step|what should/.test(q)) return 'Three simulated leadership priorities:\n1. Instrumentation: reduce overtime 12%, add 8 FTEs, and improve manager support (modeled +$1.3M annual benefit).\n2. Manufacturing: optimize shifts and expand fatigue mitigation (modeled -18% safety exposure).\n3. Assay Development: share engagement practices with Digital Pathology (modeled +6 readiness points).\nThese are prewritten examples, not AI-generated or validated forecasts.';
+    if(/readiness|index|score|trend|performance/.test(q)) return 'Overall workforce readiness is 89/100, up 4 points compared with the previous month in the demo. The composite includes recovery, resilience, engagement, workload sustainability, workforce stability, safety, innovation, and quality. The chart below the core dashboard offers 30-, 60-, and 90-day synthetic histories.';
+    return 'I can answer questions grounded in this dashboard’s synthetic data, but I do not have an external AI model or live workforce database. Try asking about burnout, division readiness, financial exposure, safety, or leadership recommendations.';
+  }
+  function ask(question){const text=question.trim();if(!text)return;post(text,'me');post(answer(text),'bot');input.value='';}
+  suggestions.forEach(s=>{const btn=document.createElement('button');btn.type='button';btn.className='chat-chip';btn.textContent=s;btn.addEventListener('click',()=>ask(s));chips.appendChild(btn);});
+  post('Hi! I’m the emPower+ demo assistant. Ask me about workforce risks, division readiness, financial exposure, or recommendations. My answers are based only on synthetic dashboard data.','bot');
+  function toggle(open){windowEl.classList.toggle('chat-open',open);launcher.setAttribute('aria-expanded',String(open));if(open) input.focus();else launcher.focus();}
+  launcher.addEventListener('click',()=>toggle(!windowEl.classList.contains('chat-open')));
+  close.addEventListener('click',()=>toggle(false));
+  form.addEventListener('submit',e=>{e.preventDefault();ask(input.value);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&windowEl.classList.contains('chat-open'))toggle(false);});
+  document.getElementById('demoLogout').addEventListener('click',()=>{windowEl.classList.remove('chat-open');launcher.setAttribute('aria-expanded','false');});
 })();
 </script>
 </body>
