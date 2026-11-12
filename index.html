@@ -70,6 +70,23 @@ body.demo-authenticated > .login-screen { display:none !important; }
 .login-notice{border-top:1px solid #e2edf5;padding-top:17px;margin:16px 0 0;font-size:11px;color:#667f97;line-height:1.55}
 .demo-logout{border:1px solid #aacce7;background:#fff;color:#005aa8;border-radius:5px;padding:6px 9px;font-size:11px;white-space:nowrap;cursor:pointer}
 @media(max-width:500px){.login-shell{padding:24px}.login-brand{font-size:25px}}
+
+/* Added demo detail: follows the original Roche command-center visual language */
+.pulse-section{grid-column:1/-1;display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:9px;min-width:0}
+.pulse-card{min-width:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.pulse-head{background:#e6f1f9;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;font-weight:700}
+.pulse-head small{font-size:10px;font-weight:400;color:#50708c}.pulse-body{padding:11px 13px}.pulse-switch{display:flex;gap:4px}
+.pulse-switch button{font-size:10px;color:#0656a8;background:#fff;border:1px solid #c7deef;border-radius:4px;padding:4px 7px}
+.pulse-switch button.selected{color:#fff;background:#0867c6;border-color:#0867c6}
+.pulse-chart{width:100%;height:125px;display:block}.pulse-foot{display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-top:6px;color:#607993;font-size:10px}
+.team-signal{display:grid;grid-template-columns:minmax(0,1fr) 52px 80px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #edf2f6;font-size:11px}
+.team-signal:last-child{border-bottom:0}.team-signal b{font-size:12px;text-align:right}.signal-meter{height:8px;border-radius:10px;background:#e4edf5;overflow:hidden}.signal-meter span{display:block;height:100%;border-radius:10px}
+.activity-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #edf2f6}.activity-item:last-child{border-bottom:0}.activity-mark{font-size:13px;flex:0 0 21px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#e0f3ed;color:#00865b}.activity-item:nth-child(2) .activity-mark{background:#fff0de;color:#c57b05}.activity-item:nth-child(3) .activity-mark{background:#e6efff;color:#0867c6}
+.activity-title{font-size:11px;font-weight:700}.activity-copy{font-size:10px;color:#4e6680;line-height:1.45;margin-top:3px}.activity-time{font-size:9px;color:#68849f;margin-top:4px}
+.demo-pulse-label{font-weight:400;color:#51738d;font-size:10px}
+@media(max-width:1100px){.pulse-section{grid-template-columns:1fr 1fr}.pulse-section .pulse-card:last-child{grid-column:1/-1}}
+@media(max-width:650px){.pulse-section{grid-template-columns:1fr}.pulse-section .pulse-card:last-child{grid-column:auto}}
+
 </style>
 </head>
 <body>
@@ -111,6 +128,21 @@ body.demo-authenticated > .login-screen { display:none !important; }
 <section class="panel span3" data-group="retention"><div class="panel-head"><div class="feature-head"><div class="feature-icon">♧</div><div class="feature-copy"><h2>Talent &amp; Retention</h2><p>Predictive Workforce Stability</p></div></div><button class="detail-link" onclick="openDetails('retention')">View Details →</button></div><div class="retention-body"><div><div class="donut"><div class="donut-center"><b>9%</b><small>Turnover Risk</small></div></div><div style="font-size:9px;text-align:center;margin-top:3px"><span class="up">▼ -3%</span> vs. last month</div></div><div class="factors"><div class="section-mini">Top Risk Factors</div><div id="riskFactors"></div></div></div></section>
 <section class="panel span3" data-group="financial"><div class="panel-head"><div class="feature-head"><div class="feature-icon">＄</div><div class="feature-copy"><h2>Financial Impact</h2><p>Annual Workforce Exposure</p></div></div><button class="detail-link" onclick="openDetails('financial')">View Details →</button></div><div class="fin-body"><div id="financialRows"></div><div class="fin-total"><span>Total Exposure</span><strong>$14.7M</strong></div></div></section>
 <section class="panel span12 ai-panel" data-group="insights"><div class="ai-label"><span class="brain">♧</span>AI Insights &amp;<br>Recommendations</div><div class="recommendations" id="recommendations"></div><button class="all-recs" onclick="openDetails('insights')">View All Recommendations →</button></section>
+
+<section class="pulse-section" data-group="workforce" aria-label="Synthetic workforce operating pulse">
+  <article class="pulse-card">
+    <div class="pulse-head"><span>Workforce Readiness Trend <small>· synthetic history</small></span><div class="pulse-switch" role="group" aria-label="Trend lookback"><button type="button" data-trend="30">30D</button><button type="button" data-trend="60">60D</button><button type="button" data-trend="90" class="selected">90D</button></div></div>
+    <div class="pulse-body"><svg class="pulse-chart" id="pulseTrend" viewBox="0 0 350 125" role="img" aria-label="Synthetic readiness and workload trend"></svg><div class="pulse-foot"><span><span style="color:#07a86a">●</span> Readiness index</span><span><span style="color:#ed9d29">●</span> Workload sustainability</span><span id="pulseSummary">Readiness +4 pts · 90 days</span></div></div>
+  </article>
+  <article class="pulse-card">
+    <div class="pulse-head"><span>Team Health Signals</span><small>Latest simulated snapshot</small></div>
+    <div class="pulse-body" id="teamSignals"></div>
+  </article>
+  <article class="pulse-card">
+    <div class="pulse-head"><span>Recent Workforce Pulse</span><small>Synthetic activity log</small></div>
+    <div class="pulse-body" id="pulseActivity"></div>
+  </article>
+</section>
 </div></div>
 <footer class="footer"><strong>emPower+ @Roche N.A. &nbsp;|&nbsp; Roche Tissue Diagnostics</strong><span class="demo-tag">SYNTHETIC DATA · DEMONSTRATION ONLY</span><span>LifeSpan Digital Health &nbsp;|&nbsp; Concept Demo</span></footer>
 </div></div>
@@ -181,6 +213,39 @@ document.querySelectorAll('[data-map]').forEach(e=>e.addEventListener('click',()
 const navDescriptions={workforce:'Population-level recovery, resilience, engagement, and readiness metrics.',safety:'Leading indicators of safety performance and quality compliance.',manufacturing:'Manufacturing operations, staffing health, and engineering sustainability.',rewards:'Incentive participation and employee recognition.',retention:'Projected turnover signals and major workforce risk factors.',division:'Compare readiness across nine Roche Tissue Diagnostics divisions.',insights:'Illustrative recommendations and innovation opportunities.',financial:'Estimated synthetic exposure across workforce-related categories.',reports:'Explore the current synthetic dashboard and its leadership metrics.'};
 function navigate(section){document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===section));let overview=section==='overview';el('sectionBanner').classList.toggle('show',!overview);el('sectionTitle').textContent=(navItems.find(x=>x[0]===section)||navItems[0])[2];el('sectionDescription').textContent=navDescriptions[section]||'';const visible={workforce:['workforce','wellbeing','division','geography'],safety:['safety','manufacturing','wellbeing'],manufacturing:['manufacturing','instrumentation','safety'],rewards:['rewards','wellbeing','retention'],retention:['retention','workforce','division'],division:['division','instrumentation','manufacturing','geography'],insights:['insights','instrumentation','manufacturing'],financial:['financial','retention','division'],reports:['workforce','division','financial','insights']}[section]||[];document.querySelectorAll('[data-group]').forEach(p=>p.classList.toggle('hide-section',!overview&&!visible.includes(p.dataset.group)));window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.nav)));el('backOverview').addEventListener('click',()=>navigate('overview'));
+
+// Additional synthetic operating detail. No live connections, employee records, or predictions.
+const demoTeamSignals=[
+  {name:'Assay Development',score:92,tone:'#13bb68'},
+  {name:'Quality & Compliance',score:91,tone:'#13bb68'},
+  {name:'Digital Pathology & AI',score:84,tone:'#f3ac2c'},
+  {name:'Instrumentation Eng.',score:78,tone:'#f3ac2c'},
+  {name:'Field Service Eng.',score:74,tone:'#ef5c48'}
+];
+el('teamSignals').innerHTML=demoTeamSignals.map(t=>`<div class="team-signal"><span>${safe(t.name)}</span><div class="signal-meter"><span style="width:${t.score}%;background:${t.tone}"></span></div><b>${t.score}/100</b></div>`).join('');
+const demoActivities=[
+  ['✓','Wellbeing check-in completed','A simulated August pulse survey closed with 82% participation.','Aug 12 · 08:30 MST'],
+  ['!','Workload threshold flagged','Instrumentation overtime exceeded the illustrative team threshold for a third week.','Aug 11 · 16:45 MST'],
+  ['↗','Quality readiness improved','The synthetic Lab Safety Compliance indicator moved up 2 points.','Aug 09 · 11:10 MST'],
+  ['✓','Recommendation reviewed','Manufacturing shift-balancing recommendation marked reviewed for the demo.','Aug 07 · 14:20 MST']
+];
+el('pulseActivity').innerHTML=demoActivities.map(a=>`<div class="activity-item"><span class="activity-mark">${a[0]}</span><div><div class="activity-title">${safe(a[1])}</div><div class="activity-copy">${safe(a[2])}</div><div class="activity-time">${safe(a[3])}</div></div></div>`).join('');
+const demoTrendHistory={
+  30:{readiness:[86,87,86,88,87,88,89],workload:[79,80,79,81,80,81,82],label:'Readiness +3 pts · 30 days'},
+  60:{readiness:[84,85,85,86,87,86,87,88,89],workload:[76,77,78,78,79,80,80,81,82],label:'Readiness +5 pts · 60 days'},
+  90:{readiness:[85,84,85,86,85,86,87,87,86,88,87,88,89],workload:[75,76,77,76,78,77,79,80,79,81,80,81,82],label:'Readiness +4 pts · 90 days'}
+};
+function drawPulseTrend(days){
+ const d=demoTrendHistory[days],x0=27,x1=340,y0=8,y1=99;
+ const y=v=>y1-(v-65)/35*(y1-y0);
+ const draw=(values,color)=>`<polyline fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v,i)=>`${x0+i*(x1-x0)/(values.length-1)},${y(v).toFixed(1)}`).join(' ')}"/>`;
+ el('pulseTrend').innerHTML=[70,80,90,100].map(v=>`<line x1="${x0}" x2="${x1}" y1="${y(v)}" y2="${y(v)}" stroke="#e8f0f6"/><text x="21" y="${y(v)+3}" text-anchor="end" font-size="9" fill="#6b8499">${v}</text>`).join('')+draw(d.readiness,'#07a86a')+draw(d.workload,'#ed9d29')+`<text x="${x0}" y="118" font-size="9" fill="#6b8499">${days} days ago</text><text x="${x1}" y="118" text-anchor="end" font-size="9" fill="#6b8499">Aug 12</text>`;
+ el('pulseSummary').textContent=d.label;
+ document.querySelectorAll('[data-trend]').forEach(b=>{b.classList.toggle('selected',+b.dataset.trend===days);b.setAttribute('aria-pressed',String(+b.dataset.trend===days))});
+}
+document.querySelectorAll('[data-trend]').forEach(b=>b.addEventListener('click',()=>drawPulseTrend(+b.dataset.trend)));
+drawPulseTrend(90);
+
 </script>
 
 <script>
@@ -193,7 +258,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()
   if(sessionStorage.getItem('roche_demo_signed_in')==='yes') showDashboard();
   form.addEventListener('submit',function(e){
     e.preventDefault();
-    if (['josh@roche.com', 'david@roche.com', 'scott@roche.com'].includes(user.value.trim().toLowerCase()) && pass.value === 'roche123'){
+    if(user.value.trim().toLowerCase()==='josh@roche.com' && pass.value==='roche123'){
       sessionStorage.setItem('roche_demo_signed_in','yes');
       showDashboard();
     } else {
