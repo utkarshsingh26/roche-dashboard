@@ -305,14 +305,14 @@ drawPulseTrend(90);
 })();
 </script>
 
-<!-- Static demo assistant; no network calls, AI API or real employee records. -->
+<!-- OpenAI-connected demo assistant; the dashboard data remains synthetic. -->
 <button class="chat-launcher" id="chatLauncher" type="button" aria-expanded="false" aria-controls="chatWindow"><span aria-hidden="true">✦</span> Ask emPower+</button>
 <section class="chat-window" id="chatWindow" role="dialog" aria-label="emPower+ demo assistant" aria-modal="false">
   <div class="chat-top"><span class="chat-avatar" aria-hidden="true">✦</span><div class="chat-top-info"><strong>emPower+ Assistant</strong><small>Workforce insights · Synthetic demo</small></div><button class="chat-close" id="chatClose" type="button" aria-label="Close assistant">×</button></div>
   <div class="chat-feed" id="chatFeed" role="log" aria-live="polite" aria-relevant="additions"></div>
   <div class="chat-chips" id="chatChips" aria-label="Suggested questions"></div>
   <form class="chat-form" id="chatForm"><input class="chat-input" id="chatInput" aria-label="Ask a dashboard question" placeholder="Ask about readiness, risks, costs..." maxlength="350" autocomplete="off"><button class="chat-send" type="submit">Send</button></form>
-  <div class="chat-disclaimer">Rule-based demo · Answers use synthetic dashboard data only</div>
+  <div class="chat-disclaimer">AI-powered demo · Responses use synthetic dashboard data only</div>
 </section>
 
 <script>
@@ -344,16 +344,63 @@ drawPulseTrend(90);
     if(/readiness|index|score|trend|performance/.test(q)) return 'Overall workforce readiness is 89/100, up 4 points compared with the previous month in the demo. The composite includes recovery, resilience, engagement, workload sustainability, workforce stability, safety, innovation, and quality. The chart below the core dashboard offers 30-, 60-, and 90-day synthetic histories.';
     return 'I can answer questions grounded in this dashboard’s synthetic data, but I do not have an external AI model or live workforce database. Try asking about burnout, division readiness, financial exposure, safety, or leadership recommendations.';
   }
-  function ask(question){const text=question.trim();if(!text)return;post(text,'me');post(answer(text),'bot');input.value='';}
+  // OpenAI-powered demo chatbot. The API key stays in the Cloudflare Worker.
+  const WORKER_URL='https://roche-dashboard-chatbot.singh-utkarsh26.workers.dev/chat';
+  const chatHistory=[];
+  let chatBusy=false;
+  async function ask(question){
+    const text=question.trim();
+    if(!text || chatBusy)return;
+    chatBusy=true;
+    post(text,'me');
+    input.value='';
+    const sendButton=form.querySelector('button[type="submit"]');
+    input.disabled=true;
+    if(sendButton)sendButton.disabled=true;
+    chips.querySelectorAll('button').forEach(button=>button.disabled=true);
+    const waiting=document.createElement('div');
+    waiting.className='chat-message bot';
+    waiting.textContent='Analyzing dashboard data…';
+    feed.appendChild(waiting);
+    feed.scrollTop=feed.scrollHeight;
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),25000);
+    try {
+      const response=await fetch(WORKER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:text,history:chatHistory.slice(-8)}),
+        signal:controller.signal
+      });
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||`Chat service error (${response.status})`);
+      const reply=(typeof data.reply==='string'&&data.reply.trim())?data.reply:'No answer was returned. Please try again.';
+      waiting.remove();
+      post(reply,'bot');
+      chatHistory.push({role:'user',content:text},{role:'assistant',content:reply});
+      if(chatHistory.length>8)chatHistory.splice(0,chatHistory.length-8);
+    } catch(error){
+      waiting.remove();
+      console.error('emPower+ assistant request failed:',error);
+      post(error.name==='AbortError'?'The request timed out. Please try again.':'Unable to contact the AI assistant right now. Please try again.','bot');
+    } finally {
+      clearTimeout(timeout);
+      chatBusy=false;
+      input.disabled=false;
+      if(sendButton)sendButton.disabled=false;
+      chips.querySelectorAll('button').forEach(button=>button.disabled=false);
+      if(windowEl.classList.contains('chat-open'))input.focus();
+    }
+  }
   suggestions.forEach(s=>{const btn=document.createElement('button');btn.type='button';btn.className='chat-chip';btn.textContent=s;btn.addEventListener('click',()=>ask(s));chips.appendChild(btn);});
-  post('Hi! I’m the emPower+ demo assistant. Ask me about workforce risks, division readiness, financial exposure, or recommendations. My answers are based only on synthetic dashboard data.','bot');
+  post('Hi! I’m the emPower+ demo assistant. Ask me about workforce risks, division readiness, financial exposure, or recommendations. I use an AI model and synthetic dashboard data; no real employee records are connected.','bot');
   function toggle(open){windowEl.classList.toggle('chat-open',open);launcher.setAttribute('aria-expanded',String(open));if(open) input.focus();else launcher.focus();}
   launcher.addEventListener('click',()=>toggle(!windowEl.classList.contains('chat-open')));
   document.getElementById('headerChatButton').addEventListener('click',()=>toggle(!windowEl.classList.contains('chat-open')));
   close.addEventListener('click',()=>toggle(false));
   form.addEventListener('submit',e=>{e.preventDefault();ask(input.value);});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&windowEl.classList.contains('chat-open'))toggle(false);});
-  document.getElementById('demoLogout').addEventListener('click',()=>{windowEl.classList.remove('chat-open');launcher.setAttribute('aria-expanded','false');});
+  document.getElementById('demoLogout').addEventListener('click',()=>{windowEl.classList.remove('chat-open');launcher.setAttribute('aria-expanded','false');chatHistory.length=0;feed.replaceChildren();post('Hi! I’m the emPower+ demo assistant. Ask me about workforce risks, division readiness, financial exposure, or recommendations. I use an AI model and synthetic dashboard data; no real employee records are connected.','bot');});
 })();
 </script>
 </body>
